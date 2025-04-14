@@ -18,20 +18,20 @@ modules:
         destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
 
   - type: rpm-ostree
-    repos:
-      - https://packages.microsoft.com/yumrepos/vscode
-      - https://download.copr.fedorainfracloud.org/results/peterwu/iosevka/fedora-41-x86_64
-    keys:
-      - https://packages.microsoft.com/keys/microsoft.asc
+    # repos:
+      # - https://copr.fedorainfracloud.org/coprs/aflyhorse/libjpeg/repo/fedora-%OS_VERSION%/
+      # - https://packages.microsoft.com/yumrepos/vscode/config.repo
+    # keys:
+      # - https://packages.microsoft.com/keys/microsoft.asc
     install:
       - btrfs-assistant
       - btrfsmaintenance
       # - code-insiders
       - earlyoom
-      - iosevka-fixed-fonts
-      - iosevka-fonts
-      - iosevka-term-fonts
-      - libjpeg8
+      # - iosevka-fixed-fonts
+      # - iosevka-fonts
+      # - iosevka-term-fonts
+      # - libjpeg8
       - neovim
       - onedrive
       - setroubleshoot
