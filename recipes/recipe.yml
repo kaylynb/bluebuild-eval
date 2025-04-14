@@ -23,12 +23,14 @@ modules:
     install:
       - btrfs-assistant
       - btrfsmaintenance
-      - code-insiders
+      # - code-insiders
       - earlyoom
       - neovim
       - setroubleshoot
       - snapper
       - syncthing
+    remove:
+      - kmod-zfs
 
   # - type: default-flatpaks
   #   notify: true # Send notification after install/uninstall is finished (true/false)
