@@ -7,5 +7,6 @@
     "langpacks",
     "ostree",
     "ublue"
-  ]
+  ],
+  "cSpell.enabled": false
 }

@@ -17,28 +17,37 @@ modules:
       - source: system
         destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
 
-  - type: rpm-ostree
+  - type: dnf
+    source: ghcr.io/blue-build/modules/dnf:dnf-module
     repos:
-      - https://copr.fedorainfracloud.org/coprs/aflyhorse/libjpeg/repo/fedora-%OS_VERSION%/aflyhorse-libjpeg-fedora-%OS_VERSION%.repo
-      - https://copr.fedorainfracloud.org/coprs/peterwu/iosevka/repo/fedora-%OS_VERSION%/peterwu-iosevka-fedora-%OS_VERSION%.repo
-      - https://packages.microsoft.com/yumrepos/vscode/config.repo
-    install:
-      - btrfs-assistant
-      - btrfsmaintenance
-      - code-insiders
-      - earlyoom
-      - iosevka-fixed-fonts
-      - iosevka-fonts
-      - iosevka-term-fonts
-      - libjpeg8
-      - neovim
-      - onedrive
-      - setroubleshoot
-      - snapper
-      - syncthing
+      copr:
+        - aflyhorse/libjpeg
+        - peterwu/iosevka
+      files:
+        - https://packages.microsoft.com/yumrepos/vscode/config.repo
     remove:
-      - kmod-zfs
-      - zfs
+      packages:
+        - gnome-tour
+    install:
+      packages:
+        - btrfs-assistant
+        - btrfsmaintenance
+        - code-insiders
+        - earlyoom
+        - iosevka-fixed-fonts
+        - iosevka-fonts
+        - iosevka-term-fonts
+        - libjpeg8
+        - onedrive
+        - setroubleshoot
+        - snapper
+        - syncthing
+
+  - type: systemd
+    system:
+      masked:
+        - zfs-import.service
+        - zfs.target
 
   # - type: default-flatpaks
   #   notify: true # Send notification after install/uninstall is finished (true/false)
