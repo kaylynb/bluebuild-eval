@@ -26,7 +26,7 @@ modules:
     install:
       - btrfs-assistant
       - btrfsmaintenance
-      - code-insiders
+      # - code-insiders
       - earlyoom
       - iosevka-fixed-fonts
       - iosevka-fonts
