@@ -1,0 +1,8 @@
+[org/gnome/Ptyxis]
+cursor-blink-mode='off'
+default-columns=unit32 100
+default-rows=uint32 25
+
+[org/gnome/Ptyxis/Shortcuts]
+move-next-tab='<Control>Tab'
+move-previous-tab='<Shift><Control>Tab'

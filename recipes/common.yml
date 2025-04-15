@@ -47,6 +47,7 @@ modules:
         - zfs-import.service
         - zfs.target
 
+  - type: gschema-overrides
   # - type: default-flatpaks
   #   notify: true # Send notification after install/uninstall is finished (true/false)
   #   system:
