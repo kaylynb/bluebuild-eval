@@ -1,0 +1,6 @@
+[org/gnome/Ptyxis]
+cursor-blink-mode='off'
+
+[org/gnome/Ptyxis/Shortcuts]
+move-next-tab='<Control>Tab'
+move-previous-tab='<Shift><Control>Tab'

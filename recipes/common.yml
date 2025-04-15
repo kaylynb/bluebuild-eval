@@ -48,6 +48,10 @@ modules:
         - zfs.target
 
   - type: gschema-overrides
+
+  - type: bling
+    install:
+      - dconf-update-service
   # - type: default-flatpaks
   #   notify: true # Send notification after install/uninstall is finished (true/false)
   #   system:
