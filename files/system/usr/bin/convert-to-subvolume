@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Default backup directory (will be set dynamically if not specified)
+BACKUP_DIR=""
+
+# Parse command line options
+while getopts "b:" opt; do
+	case $opt in
+	b)
+		BACKUP_DIR="$OPTARG"
+		;;
+	\?)
+		echo "Invalid option: -$OPTARG"
+		exit 1
+		;;
+	:)
+		echo "Option -$OPTARG requires an argument."
+		exit 1
+		;;
+	esac
+done
+
+# Adjust argument position after getopts processing
+shift $((OPTIND - 1))
+
+# Check if argument is provided
+if [ -z "$1" ]; then
+	echo "Usage: $0 [-b backup_directory] <directory_path>"
+	exit 1
+fi
+
+# Check if running as root
+if [ "$(id -u)" -ne 0 ]; then
+	echo "This script must be run as root to preserve all permissions"
+	exit 1
+fi
+
+# Normalize path
+DIR_PATH=$(realpath "$1")
+
+# Check if the directory exists
+if [ ! -d "$DIR_PATH" ]; then
+	echo "Error: $DIR_PATH is not a directory or does not exist"
+	exit 1
+fi
+
+# Check if directory is already a subvolume
+if btrfs subvolume show "$DIR_PATH" &>/dev/null; then
+	echo "$DIR_PATH is already a Btrfs subvolume"
+	exit 0
+fi
+
+# Create a temporary name for the new subvolume
+PARENT_DIR=$(dirname "$DIR_PATH")
+DIR_NAME=$(basename "$DIR_PATH")
+TEMP_SUBVOL="${PARENT_DIR}/.${DIR_NAME}_temp_subvol_$(date +%s)"
+
+echo "Converting $DIR_PATH to a Btrfs subvolume..."
+
+# Step 1: Create a new subvolume with a temporary name
+btrfs subvolume create "$TEMP_SUBVOL"
+echo "Created temporary subvolume: $TEMP_SUBVOL"
+
+# Step 2: Copy all files with permissions, ownership, and SELinux context
+rsync -axHAXS --numeric-ids "$DIR_PATH/" "$TEMP_SUBVOL/"
+echo "Copied all files with permissions and attributes"
+
+# Step 3: Verify SELinux contexts if SELinux is enabled
+if command -v getenforce >/dev/null && [ "$(getenforce)" != "Disabled" ]; then
+	# Force restore SELinux contexts
+	restorecon -R "$TEMP_SUBVOL"
+	echo "Restored SELinux contexts"
+fi
+
+# Step 4: Move original directory to a backup location
+if [ -z "$BACKUP_DIR" ]; then
+	# Default backup location if not specified
+	BACKUP_DIR="${DIR_PATH}_backup_$(date +%s)"
+else
+	# Ensure parent directories exist for custom backup location
+	mkdir -p "$(dirname "$BACKUP_DIR")"
+	# If BACKUP_DIR is a directory that already exists, store the backup inside it
+	if [ -d "$BACKUP_DIR" ]; then
+		BACKUP_DIR="${BACKUP_DIR}/${DIR_NAME}_backup_$(date +%s)"
+	fi
+fi
+
+mv "$DIR_PATH" "$BACKUP_DIR"
+echo "Original directory backed up to $BACKUP_DIR"
+
+# Step 5: Move the subvolume to the original location
+mv "$TEMP_SUBVOL" "$DIR_PATH"
+echo "New subvolume moved to original location"
+
+# Verify the directory is now a subvolume
+if btrfs subvolume show "$DIR_PATH" &>/dev/null; then
+	echo "Successfully converted $DIR_PATH to a Btrfs subvolume"
+	echo "A backup of the original directory is at $BACKUP_DIR"
+	echo "You can remove it with: rm -rf $BACKUP_DIR"
+else
+	echo "Error: Failed to create subvolume properly"
+	echo "The original data is in $BACKUP_DIR"
+	exit 1
+fi
+
+exit 0

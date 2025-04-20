@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+USER_SUBVOLUMES=(
+	nosnap
+	.local/share/containers/storage
+	.cache
+	.ollama/models
+	Downloads
+	.local/share/mise
+	.local/share/cargo
+	.local/share/rustup
+)
+
+# Process all user directories in /var/home
+for USER_DIR in /var/home/*; do
+	# Skip if not a directory
+	[ ! -d "$USER_DIR" ] && continue
+
+	# Skip linuxbrew user and hidden directories
+	USER=$(basename "$USER_DIR")
+	[[ "$USER" == "linuxbrew" || "$USER" == .* ]] && continue
+
+	echo "Processing subvolumes for user: $USER"
+
+	BACKUP_DIR="$USER_DIR/btrfs_conversion_backup"
+
+	# Create each subvolume for this user
+	for SUBVOL in "${USER_SUBVOLUMES[@]}"; do
+		TARGET_DIR="$USER_DIR/$SUBVOL"
+		echo "  Converting $TARGET_DIR to subvolume"
+		/usr/bin/convert-to-subvolume -b "$BACKUP_DIR" "$TARGET_DIR"
+	done
+done

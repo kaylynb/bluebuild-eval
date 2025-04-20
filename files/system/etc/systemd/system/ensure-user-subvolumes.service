@@ -1,0 +1,12 @@
+[Unit]
+Description=Ensure user subvolumes exist and are converted
+After=local-fs.target
+Requires=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/share/ensure-user-subvolumes
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
